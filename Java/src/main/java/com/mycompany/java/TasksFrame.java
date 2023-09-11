@@ -4,6 +4,18 @@
  */
 package com.mycompany.java;
 
+import java.awt.List;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.Vector;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+
 /**
  *
  * @author tchit
@@ -41,7 +53,7 @@ public class TasksFrame extends javax.swing.JFrame {
         btnCSVWrite = new javax.swing.JButton();
         btnViewBy = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        tableTasks = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -81,10 +93,25 @@ public class TasksFrame extends javax.swing.JFrame {
         btnDelete.setText("Delete");
 
         btnRead.setText("Read");
+        btnRead.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnReadActionPerformed(evt);
+            }
+        });
 
         btnFileWite.setText("File Write");
+        btnFileWite.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnFileWiteActionPerformed(evt);
+            }
+        });
 
         btnCSVWrite.setText("CSV Write");
+        btnCSVWrite.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCSVWriteActionPerformed(evt);
+            }
+        });
 
         btnViewBy.setText("View By");
 
@@ -142,7 +169,7 @@ public class TasksFrame extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        tableTasks.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
                 {null, null, null, null},
@@ -153,7 +180,7 @@ public class TasksFrame extends javax.swing.JFrame {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
-        jScrollPane1.setViewportView(jTable1);
+        jScrollPane1.setViewportView(tableTasks);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -187,6 +214,85 @@ public class TasksFrame extends javax.swing.JFrame {
     private void tfNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tfNameActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_tfNameActionPerformed
+
+    private void btnReadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReadActionPerformed
+        try{
+            FileInputStream file = new FileInputStream("file.bin");
+            ObjectInputStream input = new ObjectInputStream(file);
+            
+            @SuppressWarnings("unchecked")
+            Vector<Vector> tableData = (Vector<Vector>) input.readObject();
+            
+            input.close();
+            file.close();
+            
+            System.out.println("Table data has been read from file bin");
+            
+            DefaultTableModel model = (DefaultTableModel) tableTasks.getModel();
+            model.setRowCount(0);
+            for (Vector<Object> rowData : tableData){
+                model.addRow(rowData.toArray());
+            }
+            
+            System.out.println("Table data has been loaded from file.bin.");
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error reading data from file: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_btnReadActionPerformed
+
+    private void btnFileWiteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnFileWiteActionPerformed
+        DefaultTableModel model = (DefaultTableModel) tableTasks.getModel();
+        Vector<Vector> tableData = model.getDataVector();
+        
+        try{
+            FileOutputStream file = new FileOutputStream("file.bin");
+            ObjectOutputStream output = new ObjectOutputStream(file);
+            
+            output.writeObject(tableData);
+            
+            output.close();
+            file.close();
+            
+            System.out.println("Table data has been saved to file bin");
+        } catch (IOException ex){
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error saving data to file: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_btnFileWiteActionPerformed
+
+    private void btnCSVWriteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCSVWriteActionPerformed
+        DefaultTableModel model = (DefaultTableModel) tableTasks.getModel();
+        try (FileWriter writer = new FileWriter("data.csv")) {
+        int rowCount = model.getRowCount();
+        int columnCount = model.getColumnCount();
+
+        // Write the column headers to the CSV file
+        for (int i = 0; i < columnCount; i++) {
+            writer.write(model.getColumnName(i));
+            if (i < columnCount - 1) {
+                writer.write(",");
+            }
+        }
+        writer.write("\n");
+
+        // Write the table data to the CSV file
+        for (int row = 0; row < rowCount; row++) {
+            for (int col = 0; col < columnCount; col++) {
+                writer.write(model.getValueAt(row, col).toString());
+                if (col < columnCount - 1) {
+                    writer.write(",");
+                }
+            }
+            writer.write("\n");
+        }
+
+        System.out.println("Table data has been saved to CSV file");
+    } catch (IOException ex) {
+        ex.printStackTrace();
+        JOptionPane.showMessageDialog(this, "Error saving data to file: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+    }
+    }//GEN-LAST:event_btnCSVWriteActionPerformed
 
     /**
      * @param args the command line arguments
@@ -237,7 +343,7 @@ public class TasksFrame extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTable jTable1;
+    private javax.swing.JTable tableTasks;
     private javax.swing.JTextField tfCategroy;
     private javax.swing.JTextField tfName;
     // End of variables declaration//GEN-END:variables
