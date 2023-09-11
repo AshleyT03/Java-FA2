@@ -1,22 +1,19 @@
-
-
-package java;
+package taskmanager;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-public class Java {
-
+public class TaskManager {
     public static Connection getConnection() {
         Connection connection = null;
 
         try {
-            // Load the Oracle JDBC driver
+            // Load the SQLite JDBC driver
             Class.forName("org.sqlite.JDBC");
 
-            // Replace 'your_db_url', 'your_username', and 'your_password' with your actual database credentials and URL
-             String url = "jdbc:sqlite:C:\\Users\\ic westgate\\Documents\\SQL Lite Programmes\\Task Manager.db\"";
+            // Specify the correct path to your SQLite database file
+            String url = "jdbc:sqlite:C:/Users/ic westgate/Documents/SQL Lite Programmes/Task Manager.db";
 
             // Establish the connection
             connection = DriverManager.getConnection(url);
@@ -28,18 +25,17 @@ public class Java {
     }
 
     public static void main(String[] args) {
-        // TODO code application logic here
-        Connection connection = Java.getConnection();
+        Connection connection = getConnection();
 
         if (connection != null) {
-            System.out.println("Connection to Oracle database established.");
+            System.out.println("Connection to SQLite database established.");
             try {
                 connection.close(); // Close the connection
             } catch (SQLException e) {
                 e.printStackTrace();
             }
         } else {
-            System.err.println("Failed to connect to Oracle database.");
+            System.err.println("Failed to connect to SQLite database.");
         }
     }
 }
