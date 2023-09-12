@@ -1,12 +1,21 @@
 
+import java.awt.Component;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Vector;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JCheckBox;
 import javax.swing.JOptionPane;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
 
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
@@ -104,6 +113,11 @@ public class Tasks extends javax.swing.JFrame {
         });
 
         btnDelete.setText("Delete");
+        btnDelete.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDeleteActionPerformed(evt);
+            }
+        });
 
         btnFileRead.setText("file Read");
         btnFileRead.addActionListener(new java.awt.event.ActionListener() {
@@ -121,7 +135,7 @@ public class Tasks extends javax.swing.JFrame {
 
         btncsvWrite.setText("csv Write");
 
-        cbViewBy.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cbViewBy.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "All Categories", "Complete", "Incomplete"}));
         cbViewBy.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cbViewByActionPerformed(evt);
@@ -141,18 +155,19 @@ public class Tasks extends javax.swing.JFrame {
                     .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 303, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                                .addComponent(btnAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 77, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(63, 63, 63)
-                                .addComponent(btnClear, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addComponent(tfDescription)
+                            .addComponent(tfCategory)
                             .addGroup(jPanel2Layout.createSequentialGroup()
                                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(jPanel2Layout.createSequentialGroup()
+                                        .addComponent(btnAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 77, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(63, 63, 63)
+                                        .addComponent(btnClear, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE))
                                     .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                                         .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel2Layout.createSequentialGroup()
                                             .addGap(6, 6, 6)
-                                            .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 283, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                            .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 271, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addGap(18, 18, 18)
                                             .addComponent(cbViewBy, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                                         .addComponent(tfName, javax.swing.GroupLayout.Alignment.LEADING)
                                         .addGroup(jPanel2Layout.createSequentialGroup()
@@ -164,9 +179,7 @@ public class Tasks extends javax.swing.JFrame {
                                                 .addComponent(btnDelete)
                                                 .addComponent(btncsvWrite))))
                                     .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 283, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGap(0, 0, Short.MAX_VALUE))
-                            .addComponent(tfDescription)
-                            .addComponent(tfCategory))
+                                .addGap(0, 0, Short.MAX_VALUE)))
                         .addContainerGap())))
         );
         jPanel2Layout.setVerticalGroup(
@@ -246,8 +259,134 @@ public class Tasks extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private String[] getUniqueValuesFromColumn(String columnName){
+        DefaultTableModel model = (DefaultTableModel) tasksTable.getModel();
+        int columnIndex = model.findColumn(columnName);
+        int rowCount = model.getRowCount();
+
+        if (columnIndex != -1){
+            Set<String> uniqueValues = new HashSet<>();
+
+            for (int rowIndex = 0; rowIndex < rowCount; rowIndex++){
+                String cellValue = (String) model.getValueAt(rowIndex, columnIndex);
+                uniqueValues.add(cellValue);
+            }
+
+            return uniqueValues.toArray(new String[0]);
+        } else {
+            return new String[0];       // Column Not found
+        }
+}
+  
+    private void updateCategoryComboBox(){
+        // Get the initial values
+        String[] initialValues = new String[]{"All Categories", "Complete", "Incomplete"};
+
+        // Get the dynamic values from the table
+        String[] dynamicValues = getUniqueValuesFromColumn("Category");
+        
+        // Create an array to hold the initial values and dynamic values
+        String[] allValues = new String[initialValues.length + dynamicValues.length];
+        System.arraycopy(initialValues, 0, allValues, 0, initialValues.length);
+        System.arraycopy(dynamicValues, 0, allValues, initialValues.length, dynamicValues.length);
+         
+        DefaultComboBoxModel<String> comboBoxModel = new DefaultComboBoxModel<>(allValues);
+        cbViewBy.setModel(comboBoxModel);
+    }
+    
     private void cbViewByActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbViewByActionPerformed
-        // TODO add your handling code here:
+        DefaultTableModel model = (DefaultTableModel) tasksTable.getModel();    // Retrieve Table model
+        DefaultTableModel filteredModel = new DefaultTableModel(
+                new Object[][]{}, new String[]{"Task Name","Task Description", "Completed", "Task Category"}
+        );
+        
+        String selectedItem = (String) cbViewBy.getSelectedItem();              // Retrieve selected Category
+        int rowCount = model.getRowCount();                                     // Retrieve number of rows
+        
+        if (selectedItem.equals("Complete"))
+        {
+            int columnIndex = model.findColumn("Completion Status");        // Retrieve the index of the Category column
+            
+            for (int rowIndex = 0; rowIndex < rowCount; rowIndex++)
+            {
+                boolean complete = (boolean) model.getValueAt(rowIndex, columnIndex);
+                
+                if (complete)
+                {
+                    Object[] rowData = new Object[]
+                    {
+                        model.getValueAt(rowIndex, 0), 
+                        model.getValueAt(rowIndex, 1), 
+                        model.getValueAt(rowIndex, 2),
+                        model.getValueAt(rowIndex,3)
+                    };
+                    filteredModel.addRow(rowData);
+                }
+            }
+        } 
+        else if (selectedItem.equals("Incomplete"))
+        {
+            int columnIndex = model.findColumn("Completion Status");        // Retrieve the index of the Category column
+            
+            for (int rowIndex = 0; rowIndex < rowCount; rowIndex++)
+            {
+                boolean complete = (boolean) model.getValueAt(rowIndex, columnIndex);
+                
+                if (!complete)
+                {
+                    Object[] rowData = new Object[]
+                    {
+                        model.getValueAt(rowIndex, 0), 
+                        model.getValueAt(rowIndex, 1), 
+                        model.getValueAt(rowIndex, 2),
+                        model.getValueAt(rowIndex, 3)
+                    };
+                    filteredModel.addRow(rowData);
+                }
+            }
+        }
+        else 
+        {
+            int columnIndex = model.findColumn("Category");        // Retrieve the index of the Category column
+
+            for (int rowIndex = 0; rowIndex < rowCount; rowIndex++)
+            {
+                String categoryValue = (String) model.getValueAt(rowIndex, columnIndex);
+
+                if (selectedItem.equals(categoryValue))
+                {
+                    Object[] rowData = new Object[] 
+                    {
+                        model.getValueAt(rowIndex, 0), 
+                        model.getValueAt(rowIndex, 1), 
+                        model.getValueAt(rowIndex, 2),
+                        model.getValueAt(rowIndex, 3)
+                    };
+                    filteredModel.addRow(rowData);
+                }
+            }
+        }
+        
+        // Clear the original Table
+        model.setRowCount(0);
+        tasksTable.setModel(filteredModel);
+        
+        // Create a custom cell renderer for the "Completed" column
+        TableCellRenderer checkboxRenderer = new DefaultTableCellRenderer(){
+            private final JCheckBox checkbox = new JCheckBox();
+            
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column){
+                if (value instanceof Boolean){
+                    checkbox.setSelected((Boolean) value);
+                }
+                return checkbox;
+            }
+        };
+        
+        // Set the custom cell renderer for the "Completed" column
+        TableColumn column = tasksTable.getColumnModel().getColumn(2);
+        column.setCellRenderer(checkboxRenderer);
     }//GEN-LAST:event_cbViewByActionPerformed
 
     private void btnClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearActionPerformed
@@ -300,6 +439,7 @@ public class Tasks extends javax.swing.JFrame {
                 model.addRow(rowData.toArray());
             }
             
+            updateCategoryComboBox();
             System.out.println("Table data has been loaded from file.bin.");
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -324,12 +464,28 @@ public class Tasks extends javax.swing.JFrame {
         } else {
             DefaultTableModel model = (DefaultTableModel) tasksTable.getModel();
             model.addRow(new Object[] {taskName, taskDescription, isComplete, taskCategory});
+            updateCategoryComboBox();
         }
         
         tfName.setText("");
         tfDescription.setText("");
         tfCategory.setText("");
     }//GEN-LAST:event_btnAddActionPerformed
+
+    private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
+        int row = tasksTable.getSelectedRow();
+        
+        if (row < 0){
+            JOptionPane.showMessageDialog(this,
+                    "No row is selected. Please select a row",
+                    "Select row",
+                    JOptionPane.ERROR_MESSAGE);
+        } else {
+            DefaultTableModel model = (DefaultTableModel) tasksTable.getModel();
+            model.removeRow(row);
+            updateCategoryComboBox();
+        }
+    }//GEN-LAST:event_btnDeleteActionPerformed
 
     /**
      * @param args the command line arguments
