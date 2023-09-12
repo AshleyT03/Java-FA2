@@ -253,6 +253,7 @@ public class Tasks extends javax.swing.JFrame {
     private void btnClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearActionPerformed
         // Clear all textfields
         tfName.setText("");
+        tfDescription.setText("");
         tfCategory.setText("");
     }//GEN-LAST:event_btnClearActionPerformed
 
