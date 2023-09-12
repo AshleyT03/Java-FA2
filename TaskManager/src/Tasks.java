@@ -1,4 +1,4 @@
-
+import java.sql.PreparedStatement;
 import java.awt.Component;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -16,6 +16,8 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
+import taskmanager.TaskManager;
+import java.sql.SQLException;
 
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
@@ -464,10 +466,30 @@ public class Tasks extends javax.swing.JFrame {
                 "Try again",
                 JOptionPane.ERROR_MESSAGE);
         } else {
-            // Add to database and update table
-            DefaultTableModel model = (DefaultTableModel) tasksTable.getModel();
-            model.addRow(new Object[] {taskName, taskDescription, isComplete, taskCategory});
-            updateCategoryComboBox();
+            // Get the database connection from the TaskManager class
+            java.sql.Connection connection = TaskManager.getConnection();
+            
+            // Prepare the INSERT statement
+            String sqlInsert = "Insert INTO TaskManager (Task_Name, Description, Completion_Status, Category) VALUES (?, ?, ?, ?)";
+            
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sqlInsert)){
+                preparedStatement.setString(1, taskName);
+                preparedStatement.setString(2, taskDescription);
+                preparedStatement.setBoolean(3, isComplete);
+                preparedStatement.setString(4, taskCategory);
+            
+            
+                // Execute the INSERT statement
+                int rowsAffected = preparedStatement.executeUpdate();
+
+                if (rowsAffected > 0){
+                    DefaultTableModel model = (DefaultTableModel) tasksTable.getModel();
+                    model.addRow(new Object[] {taskName, taskDescription, isComplete, taskCategory});
+                    updateCategoryComboBox();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
         
         tfName.setText("");
