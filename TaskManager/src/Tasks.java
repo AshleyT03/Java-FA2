@@ -1,6 +1,8 @@
 
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Vector;
 import javax.swing.JOptionPane;
@@ -97,6 +99,11 @@ public class Tasks extends javax.swing.JFrame {
         btnDelete.setText("Delete");
 
         btnFileRead.setText("file Read");
+        btnFileRead.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnFileReadActionPerformed(evt);
+            }
+        });
 
         btnFileWrite.setText("file Write");
         btnFileWrite.addActionListener(new java.awt.event.ActionListener() {
@@ -250,6 +257,33 @@ public class Tasks extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Error saving data to file: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_btnFileWriteActionPerformed
+
+    private void btnFileReadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnFileReadActionPerformed
+        try{
+            FileInputStream file = new FileInputStream("file.bin");
+            ObjectInputStream input = new ObjectInputStream(file);
+            
+            @SuppressWarnings("unchecked")
+            Vector<Vector> tableData = (Vector<Vector>) input.readObject();
+            
+            input.close();
+            file.close();
+            
+            System.out.println("Table data has been read from file bin");
+            
+            DefaultTableModel model = (DefaultTableModel) tasksTable.getModel();
+            model.setRowCount(0);
+            for (Vector<Object> rowData : tableData){
+                model.addRow(rowData.toArray());
+            }
+            
+            System.out.println("Table data has been loaded from file.bin.");
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error reading data from file: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+
+        }
+    }//GEN-LAST:event_btnFileReadActionPerformed
 
     /**
      * @param args the command line arguments
