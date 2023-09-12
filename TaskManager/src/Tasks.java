@@ -1,3 +1,11 @@
+
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.util.Vector;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
@@ -91,6 +99,11 @@ public class Tasks extends javax.swing.JFrame {
         btnFileRead.setText("file Read");
 
         btnFileWrite.setText("file Write");
+        btnFileWrite.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnFileWriteActionPerformed(evt);
+            }
+        });
 
         btncsvWrite.setText("csv Write");
 
@@ -213,6 +226,30 @@ public class Tasks extends javax.swing.JFrame {
         tfName.setText("");
         tfCategory.setText("");
     }//GEN-LAST:event_btnClearActionPerformed
+
+    private void btnFileWriteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnFileWriteActionPerformed
+        // Cast the model of the tasks table
+        DefaultTableModel model = (DefaultTableModel) tasksTable.getModel();
+        
+        // Store the data from the table into a collection of vectors
+        Vector<Vector> tableData = model.getDataVector();
+        
+        // Saving objects in a file
+        try{
+            FileOutputStream file = new FileOutputStream("file.bin");
+            ObjectOutputStream output = new ObjectOutputStream(file);
+            
+            output.writeObject(tableData);
+            
+            output.close();
+            file.close();
+            
+            System.out.println("Table data has been saved to file bin");
+        } catch (IOException ex){
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error saving data to file: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_btnFileWriteActionPerformed
 
     /**
      * @param args the command line arguments
