@@ -295,6 +295,8 @@ public class Tasks extends javax.swing.JFrame {
     }
     
     private void cbViewByActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbViewByActionPerformed
+        // Select from database and update table
+        
         DefaultTableModel model = (DefaultTableModel) tasksTable.getModel();    // Retrieve Table model
         DefaultTableModel filteredModel = new DefaultTableModel(
                 new Object[][]{}, new String[]{"Task Name","Task Description", "Completed", "Task Category"}
@@ -462,6 +464,7 @@ public class Tasks extends javax.swing.JFrame {
                 "Try again",
                 JOptionPane.ERROR_MESSAGE);
         } else {
+            // Add to database and update table
             DefaultTableModel model = (DefaultTableModel) tasksTable.getModel();
             model.addRow(new Object[] {taskName, taskDescription, isComplete, taskCategory});
             updateCategoryComboBox();
@@ -481,6 +484,7 @@ public class Tasks extends javax.swing.JFrame {
                     "Select row",
                     JOptionPane.ERROR_MESSAGE);
         } else {
+            // Delete from database and update table
             DefaultTableModel model = (DefaultTableModel) tasksTable.getModel();
             model.removeRow(row);
             updateCategoryComboBox();
