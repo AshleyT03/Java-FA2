@@ -506,10 +506,29 @@ public class Tasks extends javax.swing.JFrame {
                     "Select row",
                     JOptionPane.ERROR_MESSAGE);
         } else {
-            // Delete from database and update table
-            DefaultTableModel model = (DefaultTableModel) tasksTable.getModel();
-            model.removeRow(row);
-            updateCategoryComboBox();
+            // Get the database connection from the TaskManager class
+            java.sql.Connection connection = TaskManager.getConnection();
+            
+            try{
+                String taskNameToDelete = (String) tasksTable.getValueAt(row, 0);
+                // Prepare the INSERT statement
+                String sqlInsert = "DELETE FROM yourtable WHERE taskName = ?";
+
+                try (PreparedStatement preparedStatement = connection.prepareStatement(sqlInsert)){
+                    preparedStatement.setString(1, taskNameToDelete);           
+
+                    // Execute the DELETE statement
+                    int rowsAffected = preparedStatement.executeUpdate();
+
+                    if (rowsAffected > 0){
+                        DefaultTableModel model = (DefaultTableModel) tasksTable.getModel();
+                        model.removeRow(row);
+                        updateCategoryComboBox();
+                    }
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }   
         }
     }//GEN-LAST:event_btnDeleteActionPerformed
 
