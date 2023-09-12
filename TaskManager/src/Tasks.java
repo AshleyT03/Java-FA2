@@ -80,6 +80,11 @@ public class Tasks extends javax.swing.JFrame {
         btnAdd.setText("Add");
 
         btnClear.setText("Clear");
+        btnClear.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnClearActionPerformed(evt);
+            }
+        });
 
         btnDelete.setText("Delete");
 
@@ -144,7 +149,7 @@ public class Tasks extends javax.swing.JFrame {
                     .addComponent(btnAdd)
                     .addComponent(btnClear)
                     .addComponent(btnDelete))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 404, Short.MAX_VALUE)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnFileRead)
                     .addComponent(btnFileWrite)
@@ -192,7 +197,7 @@ public class Tasks extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 590, Short.MAX_VALUE))
+                    .addComponent(jScrollPane1))
                 .addContainerGap())
         );
 
@@ -202,6 +207,12 @@ public class Tasks extends javax.swing.JFrame {
     private void cbViewByActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbViewByActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_cbViewByActionPerformed
+
+    private void btnClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearActionPerformed
+        // Clear all textfields
+        tfName.setText("");
+        tfCategory.setText("");
+    }//GEN-LAST:event_btnClearActionPerformed
 
     /**
      * @param args the command line arguments
