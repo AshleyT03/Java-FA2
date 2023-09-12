@@ -309,7 +309,26 @@ public class Tasks extends javax.swing.JFrame {
     }//GEN-LAST:event_btnFileReadActionPerformed
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
+        // GET the values from user
+        String taskName = tfName.getText();
+        String taskDescription = tfDescription.getText();
+        String taskCategory = tfCategory.getText();
+        boolean isComplete = false;
+
+        if (taskName.isEmpty() | taskDescription.isEmpty())
+        {
+            JOptionPane.showMessageDialog(this,
+                "Please enter all fields",
+                "Try again",
+                JOptionPane.ERROR_MESSAGE);
+        } else {
+            DefaultTableModel model = (DefaultTableModel) tasksTable.getModel();
+            model.addRow(new Object[] {taskName, taskDescription, isComplete, taskCategory});
+        }
         
+        tfName.setText("");
+        tfDescription.setText("");
+        tfCategory.setText("");
     }//GEN-LAST:event_btnAddActionPerformed
 
     /**
