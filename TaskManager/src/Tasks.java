@@ -434,7 +434,7 @@ public class Tasks extends javax.swing.JFrame {
             java.sql.Connection connection = TaskManager.getConnection();
             
             // Prepare the INSERT statement
-            String sqlInsert = "Insert INTO TaskManager (Task_Name, Description, Completion_Status, Category) VALUES (?, ?, ?, ?)";
+            String sqlInsert = "Insert INTO Tasks (Task_Name, Description, Completion_Status, Category) VALUES (?, ?, ?, ?)";
             
             try (PreparedStatement preparedStatement = connection.prepareStatement(sqlInsert)){
                 preparedStatement.setString(1, taskName);
