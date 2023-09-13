@@ -20,6 +20,9 @@ import javax.swing.table.TableColumn;
 import taskmanager.TaskManager;
 import java.sql.SQLException;
 import java.sql.ResultSet;
+import javax.swing.DefaultCellEditor;
+import javax.swing.event.CellEditorListener;
+import javax.swing.event.ChangeEvent;
 
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
@@ -242,7 +245,31 @@ public class Tasks extends javax.swing.JFrame {
                 return types [columnIndex];
             }
         });
+        // Attach an ItemListener to the checkbox column
+        int checkboxColumnIndex = 2;
+        tasksTable.getColumnModel().getColumn(checkboxColumnIndex).setCellEditor(new DefaultCellEditor(new JCheckBox()));
+        tasksTable.getColumnModel().getColumn(checkboxColumnIndex).getCellEditor().addCellEditorListener(new CellEditorListener(){
+            @Override
+            public void editingStopped(ChangeEvent e){
+                int row = tasksTable.getSelectedRow();
+                boolean isChecked = (boolean) tasksTable.getValueAt(row, checkboxColumnIndex);
+
+                // Update the database with the new state
+                updateDatabase(row, isChecked);
+            }
+
+            @Override
+            public void editingCanceled(ChangeEvent e){
+
+            }
+        });
         jScrollPane1.setViewportView(tasksTable);
+        if (tasksTable.getColumnModel().getColumnCount() > 0) {
+            tasksTable.getColumnModel().getColumn(0).setHeaderValue("Task Name");
+            tasksTable.getColumnModel().getColumn(1).setHeaderValue("Description");
+            tasksTable.getColumnModel().getColumn(2).setHeaderValue("Completion Status");
+            tasksTable.getColumnModel().getColumn(3).setHeaderValue("Category");
+        }
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -306,6 +333,26 @@ public class Tasks extends javax.swing.JFrame {
          
         DefaultComboBoxModel<String> comboBoxModel = new DefaultComboBoxModel<>(allValues);
         cbViewBy.setModel(comboBoxModel);
+    }
+    
+    private void updateDatabase(int row, boolean isChecked){
+        try (java.sql.Connection connection = TaskManager.getConnection()) {
+            String sqlUpdate = "UPDATE yourtable SET Completed = ? WHERE id = ?"; // Adjust the SQL query accordingly
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sqlUpdate)) {
+                preparedStatement.setBoolean(1, isChecked);
+                preparedStatement.setInt(2, row + 1); // Assuming the ID is in a column named "id" and starts from 1
+                int rowsAffected = preparedStatement.executeUpdate();
+
+                if (rowsAffected > 0) {
+                    // Database updated successfully
+                } else {
+                    // Handle the case where the update failed
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            // Handle the exception appropriately
+        }
     }
     
     private void cbViewByActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbViewByActionPerformed

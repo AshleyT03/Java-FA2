@@ -304,33 +304,28 @@
       <SubComponents>
         <Component class="javax.swing.JTable" name="tasksTable">
           <Properties>
-            <Property name="model" type="javax.swing.table.TableModel" editor="org.netbeans.modules.form.editors2.TableModelEditor">
-              <Table columnCount="4" rowCount="0">
-                <Column editable="true" title="Task Name" type="java.lang.String"/>
-                <Column editable="true" title="Description" type="java.lang.String"/>
-                <Column editable="true" title="Completion Status" type="java.lang.Boolean"/>
-                <Column editable="true" title="Category" type="java.lang.String"/>
-              </Table>
+            <Property name="model" type="javax.swing.table.TableModel" editor="org.netbeans.modules.form.RADConnectionPropertyEditor" postCode="// Attach an ItemListener to the checkbox column&#xa;int checkboxColumnIndex = 2;&#xa;tasksTable.getColumnModel().getColumn(checkboxColumnIndex).setCellEditor(new DefaultCellEditor(new JCheckBox()));&#xa;tasksTable.getColumnModel().getColumn(checkboxColumnIndex).getCellEditor().addCellEditorListener(new CellEditorListener(){&#xa;    @Override&#xa;    public void editingStopped(ChangeEvent e){&#xa;        int row = tasksTable.getSelectedRow();&#xa;        boolean isChecked = (boolean) tasksTable.getValueAt(row, checkboxColumnIndex);&#xa;&#xa;        // Update the database with the new state&#xa;        updateDatabase(row, isChecked);&#xa;    }&#xa;&#xa;    @Override&#xa;    public void editingCanceled(ChangeEvent e){&#xa;&#xa;    }&#xa;});">
+              <Connection code="new javax.swing.table.DefaultTableModel(&#xa;    new Object [][] {&#xa;&#xa;    },&#xa;    new String [] {&#xa;        &quot;Task Name&quot;, &quot;Description&quot;, &quot;Completion Status&quot;, &quot;Category&quot;&#xa;    }&#xa;) {&#xa;    Class[] types = new Class [] {&#xa;        java.lang.String.class, java.lang.String.class, java.lang.Boolean.class, java.lang.String.class&#xa;    };&#xa;&#xa;    public Class getColumnClass(int columnIndex) {&#xa;        return types [columnIndex];&#xa;    }&#xa;}" type="code"/>
             </Property>
             <Property name="columnModel" type="javax.swing.table.TableColumnModel" editor="org.netbeans.modules.form.editors2.TableColumnModelEditor">
               <TableColumnModel selectionModel="0">
                 <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
-                  <Title/>
+                  <Title value="Task Name"/>
                   <Editor/>
                   <Renderer/>
                 </Column>
                 <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
-                  <Title/>
+                  <Title value="Description"/>
                   <Editor/>
                   <Renderer/>
                 </Column>
                 <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
-                  <Title/>
+                  <Title value="Completion Status"/>
                   <Editor/>
                   <Renderer/>
                 </Column>
                 <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
-                  <Title/>
+                  <Title value="Category"/>
                   <Editor/>
                   <Renderer/>
                 </Column>
