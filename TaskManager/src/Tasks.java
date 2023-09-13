@@ -2,7 +2,6 @@ import java.sql.PreparedStatement;
 import java.awt.Component;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -143,11 +142,6 @@ public class Tasks extends javax.swing.JFrame {
         });
 
         btncsvWrite.setText("csv Write");
-        btncsvWrite.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btncsvWriteActionPerformed(evt);
-            }
-        });
 
         cbViewBy.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "All Categories", "Complete", "Incomplete"}));
         cbViewBy.addActionListener(new java.awt.event.ActionListener() {
@@ -416,10 +410,9 @@ public class Tasks extends javax.swing.JFrame {
             model.setRowCount(0);
             for (Vector<Object> rowData : tableData){
                 model.addRow(rowData.toArray());
-                updateCategoryComboBox();
             }
             
-            //updateCategoryComboBox();
+            updateCategoryComboBox();
             System.out.println("Table data has been loaded from file.bin.");
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -488,7 +481,7 @@ public class Tasks extends javax.swing.JFrame {
             try{
                 String taskNameToDelete = (String) tasksTable.getValueAt(row, 0);
                 // Prepare the INSERT statement
-                String sqlInsert = "DELETE FROM Tasks WHERE Task_Name = ?";
+                String sqlInsert = "DELETE FROM yourtable WHERE taskName = ?";
 
                 try (PreparedStatement preparedStatement = connection.prepareStatement(sqlInsert)){
                     preparedStatement.setString(1, taskNameToDelete);           
@@ -508,6 +501,7 @@ public class Tasks extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_btnDeleteActionPerformed
 
+<<<<<<< HEAD
 <<<<<<< HEAD
     private void btncsvWriteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btncsvWriteActionPerformed
         DefaultTableModel model = (DefaultTableModel) tasksTable.getModel();
@@ -571,6 +565,8 @@ public class Tasks extends javax.swing.JFrame {
     }//GEN-LAST:event_formWindowOpened
 >>>>>>> bf5cf6948a7a3c000412425b53941a79a8af82dd
 
+=======
+>>>>>>> parent of 38f9353 (Connect delete button to database)
     /**
      * @param args the command line arguments
      */
