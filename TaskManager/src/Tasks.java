@@ -67,6 +67,11 @@ public class Tasks extends javax.swing.JFrame {
         tasksTable = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowOpened(java.awt.event.WindowEvent evt) {
+                formWindowOpened(evt);
+            }
+        });
 
         jPanel1.setBackground(new java.awt.Color(0, 0, 0));
         jPanel1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(255, 102, 0), 5));
@@ -495,6 +500,34 @@ public class Tasks extends javax.swing.JFrame {
             }   
         }
     }//GEN-LAST:event_btnDeleteActionPerformed
+
+    private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
+        String sqlQuery = "SELECT * FROM yourtable";
+
+        try (java.sql.Connection connection = TaskManager.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery);
+             ResultSet resultSet = preparedStatement.executeQuery()) {
+
+            DefaultTableModel model = (DefaultTableModel) tasksTable.getModel();
+
+            // Clear the table data before populating it with new data
+            model.setRowCount(0);
+
+            while (resultSet.next()) {
+                String taskName = resultSet.getString("TaskName");
+                String taskDescription = resultSet.getString("TaskDescription");
+                boolean isComplete = resultSet.getBoolean("Completed");
+                String taskCategory = resultSet.getString("TaskCategory");
+
+                // Add the retrieved data to the table model
+                model.addRow(new Object[]{taskName, taskDescription, isComplete, taskCategory});
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        updateCategoryComboBox();
+    }//GEN-LAST:event_formWindowOpened
 
     /**
      * @param args the command line arguments
