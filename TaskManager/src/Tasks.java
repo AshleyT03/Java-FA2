@@ -2,6 +2,7 @@ import java.sql.PreparedStatement;
 import java.awt.Component;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -142,6 +143,11 @@ public class Tasks extends javax.swing.JFrame {
         });
 
         btncsvWrite.setText("csv Write");
+        btncsvWrite.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btncsvWriteActionPerformed(evt);
+            }
+        });
 
         cbViewBy.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "All Categories", "Complete", "Incomplete"}));
         cbViewBy.addActionListener(new java.awt.event.ActionListener() {
@@ -310,13 +316,13 @@ public class Tasks extends javax.swing.JFrame {
         String sqlQuery = "";
 
         if (selectedItem.equals("Complete")) {
-            sqlQuery = "SELECT * FROM yourtable WHERE Completed = true";
+            sqlQuery = "SELECT * FROM tasks WHERE Completion_Status = true";
         } else if (selectedItem.equals("Incomplete")) {
-            sqlQuery = "SELECT * FROM yourtable WHERE Completed = false";
+            sqlQuery = "SELECT * FROM tasks WHERE Completion_Status = false";
         } else if (selectedItem.equals("All Categories")) {
-            sqlQuery = "SELECT * FROM yourtable";
+            sqlQuery = "SELECT * FROM tasks";
         } else {
-            sqlQuery = "SELECT * FROM yourtable WHERE TaskCategory = ?";
+            sqlQuery = "SELECT * FROM tasks WHERE Category = ?";
         }
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery)) {
@@ -330,10 +336,10 @@ public class Tasks extends javax.swing.JFrame {
 
                 while (resultSet.next()) {
                     // Retrieve data from the result set
-                    String taskName = resultSet.getString("TaskName");
-                    String taskDescription = resultSet.getString("TaskDescription");
-                    boolean isComplete = resultSet.getBoolean("Completed");
-                    String taskCategory = resultSet.getString("TaskCategory");
+                    String taskName = resultSet.getString("Task_Name");
+                    String taskDescription = resultSet.getString("Description");
+                    boolean isComplete = resultSet.getBoolean("Completion_Status");
+                    String taskCategory = resultSet.getString("Category");
 
                     model.addRow(new Object[]{taskName, taskDescription, isComplete, taskCategory});
                 }
@@ -481,7 +487,7 @@ public class Tasks extends javax.swing.JFrame {
             try{
                 String taskNameToDelete = (String) tasksTable.getValueAt(row, 0);
                 // Prepare the INSERT statement
-                String sqlInsert = "DELETE FROM yourtable WHERE taskName = ?";
+                String sqlInsert = "DELETE FROM tasks WHERE task_Name = ?";
 
                 try (PreparedStatement preparedStatement = connection.prepareStatement(sqlInsert)){
                     preparedStatement.setString(1, taskNameToDelete);           
@@ -501,8 +507,41 @@ public class Tasks extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_btnDeleteActionPerformed
 
+    private void btncsvWriteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btncsvWriteActionPerformed
+        DefaultTableModel model = (DefaultTableModel) tasksTable.getModel();
+        try (FileWriter writer = new FileWriter("data.csv")) {
+        int rowCount = model.getRowCount();
+        int columnCount = model.getColumnCount();
+
+        // Write the column headers to the CSV file
+        for (int i = 0; i < columnCount; i++) {
+            writer.write(model.getColumnName(i));
+            if (i < columnCount - 1) {
+                writer.write(",");
+            }
+        }
+        writer.write("\n");
+
+        // Write the table data to the CSV file
+        for (int row = 0; row < rowCount; row++) {
+            for (int col = 0; col < columnCount; col++) {
+                writer.write(model.getValueAt(row, col).toString());
+                if (col < columnCount - 1) {
+                    writer.write(",");
+                }
+            }
+            writer.write("\n");
+        }
+
+        System.out.println("Table data has been saved to CSV file");
+    } catch (IOException ex) {
+        ex.printStackTrace();
+        JOptionPane.showMessageDialog(this, "Error saving data to file: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+    }        // TODO add your handling code here:
+    }//GEN-LAST:event_btncsvWriteActionPerformed
+
     private void formWindowOpened(java.awt.event.WindowEvent evt) {                                  
-    String sqlQuery = "SELECT * FROM yourtable";
+    String sqlQuery = "SELECT * FROM tasks";
 
     try (java.sql.Connection connection = TaskManager.getConnection();
          PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery);
@@ -514,14 +553,15 @@ public class Tasks extends javax.swing.JFrame {
         model.setRowCount(0);
 
         while (resultSet.next()) {
-            String taskName = resultSet.getString("TaskName");
-            String taskDescription = resultSet.getString("TaskDescription");
-            boolean isComplete = resultSet.getBoolean("Completed");
-            String taskCategory = resultSet.getString("TaskCategory");
+            String taskName = resultSet.getString("Task_Name");
+            String taskDescription = resultSet.getString("Description");
+            boolean isComplete = resultSet.getBoolean("Completion_Status");
+            String taskCategory = resultSet.getString("Category");
 
             // Add the retrieved data to the table model
             model.addRow(new Object[]{taskName, taskDescription, isComplete, taskCategory});
         }
+        updateCategoryComboBox();
     } catch (SQLException e) {
         e.printStackTrace();
     }
