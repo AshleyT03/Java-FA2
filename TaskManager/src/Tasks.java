@@ -19,6 +19,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import taskmanager.TaskManager;
 import java.sql.SQLException;
+import java.sql.ResultSet;
 
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
@@ -67,6 +68,11 @@ public class Tasks extends javax.swing.JFrame {
         tasksTable = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowOpened(java.awt.event.WindowEvent evt) {
+                formWindowOpened(evt);
+            }
+        });
 
         jPanel1.setBackground(new java.awt.Color(0, 0, 0));
         jPanel1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(255, 102, 0), 5));
@@ -304,99 +310,62 @@ public class Tasks extends javax.swing.JFrame {
     
     private void cbViewByActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbViewByActionPerformed
         // Select from database and update table
-        
-        DefaultTableModel model = (DefaultTableModel) tasksTable.getModel();    // Retrieve Table model
-        DefaultTableModel filteredModel = new DefaultTableModel(
-                new Object[][]{}, new String[]{"Task Name","Task Description", "Completed", "Task Category"}
-        );
-        
         String selectedItem = (String) cbViewBy.getSelectedItem();              // Retrieve selected Category
-        int rowCount = model.getRowCount();                                     // Retrieve number of rows
         
-        if (selectedItem.equals("Complete"))
-        {
-            int columnIndex = model.findColumn("Completion Status");        // Retrieve the index of the Category column
-            
-            for (int rowIndex = 0; rowIndex < rowCount; rowIndex++)
-            {
-                boolean complete = (boolean) model.getValueAt(rowIndex, columnIndex);
-                
-                if (complete)
-                {
-                    Object[] rowData = new Object[]
-                    {
-                        model.getValueAt(rowIndex, 0), 
-                        model.getValueAt(rowIndex, 1), 
-                        model.getValueAt(rowIndex, 2),
-                        model.getValueAt(rowIndex,3)
-                    };
-                    filteredModel.addRow(rowData);
-                }
+        try (java.sql.Connection connection = TaskManager.getConnection()) {
+        String sqlQuery = "";
+
+        if (selectedItem.equals("Complete")) {
+            sqlQuery = "SELECT * FROM yourtable WHERE Completed = true";
+        } else if (selectedItem.equals("Incomplete")) {
+            sqlQuery = "SELECT * FROM yourtable WHERE Completed = false";
+        } else if (selectedItem.equals("All Categories")) {
+            sqlQuery = "SELECT * FROM yourtable";
+        } else {
+            sqlQuery = "SELECT * FROM yourtable WHERE TaskCategory = ?";
+        }
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery)) {
+            if (!selectedItem.equals("Complete") && !selectedItem.equals("Incomplete") && !selectedItem.equals("All Categories")) {
+                preparedStatement.setString(1, selectedItem);
             }
-        } 
-        else if (selectedItem.equals("Incomplete"))
-        {
-            int columnIndex = model.findColumn("Completion Status");        // Retrieve the index of the Category column
-            
-            for (int rowIndex = 0; rowIndex < rowCount; rowIndex++)
-            {
-                boolean complete = (boolean) model.getValueAt(rowIndex, columnIndex);
-                
-                if (!complete)
-                {
-                    Object[] rowData = new Object[]
-                    {
-                        model.getValueAt(rowIndex, 0), 
-                        model.getValueAt(rowIndex, 1), 
-                        model.getValueAt(rowIndex, 2),
-                        model.getValueAt(rowIndex, 3)
-                    };
-                    filteredModel.addRow(rowData);
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                DefaultTableModel model = (DefaultTableModel) tasksTable.getModel();
+                model.setRowCount(0); // Clear the original Table
+
+                while (resultSet.next()) {
+                    // Retrieve data from the result set
+                    String taskName = resultSet.getString("TaskName");
+                    String taskDescription = resultSet.getString("TaskDescription");
+                    boolean isComplete = resultSet.getBoolean("Completed");
+                    String taskCategory = resultSet.getString("TaskCategory");
+
+                    model.addRow(new Object[]{taskName, taskDescription, isComplete, taskCategory});
                 }
             }
         }
-        else 
-        {
-            int columnIndex = model.findColumn("Category");        // Retrieve the index of the Category column
+    } catch (SQLException e) {
+        e.printStackTrace();
+        // Handle the exception appropriately
+    }
+        
+    // Create a custom cell renderer for the "Completed" column
+    TableCellRenderer checkboxRenderer = new DefaultTableCellRenderer() {
+        private final JCheckBox checkbox = new JCheckBox();
 
-            for (int rowIndex = 0; rowIndex < rowCount; rowIndex++)
-            {
-                String categoryValue = (String) model.getValueAt(rowIndex, columnIndex);
-
-                if (selectedItem.equals(categoryValue))
-                {
-                    Object[] rowData = new Object[] 
-                    {
-                        model.getValueAt(rowIndex, 0), 
-                        model.getValueAt(rowIndex, 1), 
-                        model.getValueAt(rowIndex, 2),
-                        model.getValueAt(rowIndex, 3)
-                    };
-                    filteredModel.addRow(rowData);
-                }
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            if (value instanceof Boolean) {
+                checkbox.setSelected((Boolean) value);
             }
+            return checkbox;
         }
-        
-        // Clear the original Table
-        model.setRowCount(0);
-        tasksTable.setModel(filteredModel);
-        
-        // Create a custom cell renderer for the "Completed" column
-        TableCellRenderer checkboxRenderer = new DefaultTableCellRenderer(){
-            private final JCheckBox checkbox = new JCheckBox();
-            
-            @Override
-            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column){
-                if (value instanceof Boolean){
-                    checkbox.setSelected((Boolean) value);
-                }
-                return checkbox;
-            }
-        };
-        
-        // Set the custom cell renderer for the "Completed" column
-        TableColumn column = tasksTable.getColumnModel().getColumn(2);
-        column.setCellRenderer(checkboxRenderer);
+    };
+
+    // Set the custom cell renderer for the "Completed" column
+    TableColumn column = tasksTable.getColumnModel().getColumn(2);
+    column.setCellRenderer(checkboxRenderer);
     }//GEN-LAST:event_cbViewByActionPerformed
 
     private void btnClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearActionPerformed
@@ -539,6 +508,7 @@ public class Tasks extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_btnDeleteActionPerformed
 
+<<<<<<< HEAD
     private void btncsvWriteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btncsvWriteActionPerformed
         DefaultTableModel model = (DefaultTableModel) tasksTable.getModel();
         try (FileWriter writer = new FileWriter("data.csv")) {
@@ -571,6 +541,35 @@ public class Tasks extends javax.swing.JFrame {
         JOptionPane.showMessageDialog(this, "Error saving data to file: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
     }        // TODO add your handling code here:
     }//GEN-LAST:event_btncsvWriteActionPerformed
+=======
+    private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
+        String sqlQuery = "SELECT * FROM yourtable";
+
+        try (java.sql.Connection connection = TaskManager.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery);
+             ResultSet resultSet = preparedStatement.executeQuery()) {
+
+            DefaultTableModel model = (DefaultTableModel) tasksTable.getModel();
+
+            // Clear the table data before populating it with new data
+            model.setRowCount(0);
+
+            while (resultSet.next()) {
+                String taskName = resultSet.getString("TaskName");
+                String taskDescription = resultSet.getString("TaskDescription");
+                boolean isComplete = resultSet.getBoolean("Completed");
+                String taskCategory = resultSet.getString("TaskCategory");
+
+                // Add the retrieved data to the table model
+                model.addRow(new Object[]{taskName, taskDescription, isComplete, taskCategory});
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        updateCategoryComboBox();
+    }//GEN-LAST:event_formWindowOpened
+>>>>>>> bf5cf6948a7a3c000412425b53941a79a8af82dd
 
     /**
      * @param args the command line arguments
