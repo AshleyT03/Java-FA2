@@ -2,6 +2,7 @@ import java.sql.PreparedStatement;
 import java.awt.Component;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -136,6 +137,11 @@ public class Tasks extends javax.swing.JFrame {
         });
 
         btncsvWrite.setText("csv Write");
+        btncsvWrite.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btncsvWriteActionPerformed(evt);
+            }
+        });
 
         cbViewBy.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "All Categories", "Complete", "Incomplete"}));
         cbViewBy.addActionListener(new java.awt.event.ActionListener() {
@@ -441,9 +447,10 @@ public class Tasks extends javax.swing.JFrame {
             model.setRowCount(0);
             for (Vector<Object> rowData : tableData){
                 model.addRow(rowData.toArray());
+                updateCategoryComboBox();
             }
             
-            updateCategoryComboBox();
+            //updateCategoryComboBox();
             System.out.println("Table data has been loaded from file.bin.");
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -512,7 +519,7 @@ public class Tasks extends javax.swing.JFrame {
             try{
                 String taskNameToDelete = (String) tasksTable.getValueAt(row, 0);
                 // Prepare the INSERT statement
-                String sqlInsert = "DELETE FROM yourtable WHERE taskName = ?";
+                String sqlInsert = "DELETE FROM Tasks WHERE Task_Name = ?";
 
                 try (PreparedStatement preparedStatement = connection.prepareStatement(sqlInsert)){
                     preparedStatement.setString(1, taskNameToDelete);           
@@ -531,6 +538,39 @@ public class Tasks extends javax.swing.JFrame {
             }   
         }
     }//GEN-LAST:event_btnDeleteActionPerformed
+
+    private void btncsvWriteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btncsvWriteActionPerformed
+        DefaultTableModel model = (DefaultTableModel) tasksTable.getModel();
+        try (FileWriter writer = new FileWriter("data.csv")) {
+        int rowCount = model.getRowCount();
+        int columnCount = model.getColumnCount();
+
+        // Write the column headers to the CSV file
+        for (int i = 0; i < columnCount; i++) {
+            writer.write(model.getColumnName(i));
+            if (i < columnCount - 1) {
+                writer.write(",");
+            }
+        }
+        writer.write("\n");
+
+        // Write the table data to the CSV file
+        for (int row = 0; row < rowCount; row++) {
+            for (int col = 0; col < columnCount; col++) {
+                writer.write(model.getValueAt(row, col).toString());
+                if (col < columnCount - 1) {
+                    writer.write(",");
+                }
+            }
+            writer.write("\n");
+        }
+
+        System.out.println("Table data has been saved to CSV file");
+    } catch (IOException ex) {
+        ex.printStackTrace();
+        JOptionPane.showMessageDialog(this, "Error saving data to file: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+    }        // TODO add your handling code here:
+    }//GEN-LAST:event_btncsvWriteActionPerformed
 
     /**
      * @param args the command line arguments
