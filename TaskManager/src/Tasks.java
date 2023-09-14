@@ -431,7 +431,7 @@ public class Tasks extends javax.swing.JFrame {
         
         // Saving objects in a file
         try{
-            FileOutputStream file = new FileOutputStream("file.bin");
+            FileOutputStream file = new FileOutputStream("file.txt");
             ObjectOutputStream output = new ObjectOutputStream(file);
             
             output.writeObject(tableData);
@@ -448,7 +448,7 @@ public class Tasks extends javax.swing.JFrame {
 
     private void btnFileReadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnFileReadActionPerformed
         try{
-            FileInputStream file = new FileInputStream("file.bin");
+            FileInputStream file = new FileInputStream("file.txt");
             ObjectInputStream input = new ObjectInputStream(file);
             
             @SuppressWarnings("unchecked")
