@@ -337,7 +337,7 @@ public class Tasks extends javax.swing.JFrame {
     
     private void updateDatabase(int row, boolean isChecked){
         try (java.sql.Connection connection = TaskManager.getConnection()) {
-            String sqlUpdate = "UPDATE yourtable SET Completed = ? WHERE id = ?"; // Adjust the SQL query accordingly
+            String sqlUpdate = "UPDATE tasks SET Completion_Status = ? WHERE Task_Id = ?"; // Adjust the SQL query accordingly
             try (PreparedStatement preparedStatement = connection.prepareStatement(sqlUpdate)) {
                 preparedStatement.setBoolean(1, isChecked);
                 preparedStatement.setInt(2, row + 1); // Assuming the ID is in a column named "id" and starts from 1
