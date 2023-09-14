@@ -23,6 +23,13 @@ import java.sql.ResultSet;
 import javax.swing.DefaultCellEditor;
 import javax.swing.event.CellEditorListener;
 import javax.swing.event.ChangeEvent;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Vector;
+import javax.swing.table.DefaultTableModel;
 
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
@@ -429,24 +436,30 @@ public class Tasks extends javax.swing.JFrame {
         // Store the data from the table into a collection of vectors
         Vector<Vector> tableData = model.getDataVector();
         
+        // Specify the path to the txt file
+        String filePath = "file.txt";
+        
         // Saving objects in a file
-        try{
-            FileOutputStream file = new FileOutputStream("file.txt");
-            ObjectOutputStream output = new ObjectOutputStream(file);
-            
-            output.writeObject(tableData);
-            
-            output.close();
-            file.close();
-            
-            System.out.println("Table data has been saved to file bin");
-        } catch (IOException ex){
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+        // Write the header row
+        writer.write("Task_Name, Description,Completion_Status, Category\n");
+
+        // Write the data rows
+        for (Vector<Object> rowData : tableData) {
+            String row = rowData.get(0) + "," + rowData.get(1) + "," + rowData.get(2) + "," + rowData.get(3) + "\n";
+            writer.write(row);
+        }
+
+        System.out.println("Table data has been saved to file.csv");
+        } catch (IOException ex) {
             ex.printStackTrace();
             JOptionPane.showMessageDialog(this, "Error saving data to file: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_btnFileWriteActionPerformed
 
     private void btnFileReadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnFileReadActionPerformed
+        
+        String filePath = "file.txt";
         try{
             FileInputStream file = new FileInputStream("file.txt");
             ObjectInputStream input = new ObjectInputStream(file);
@@ -457,7 +470,7 @@ public class Tasks extends javax.swing.JFrame {
             input.close();
             file.close();
             
-            System.out.println("Table data has been read from file bin");
+            System.out.println("Table data has been read from file txt file");
             
             DefaultTableModel model = (DefaultTableModel) tasksTable.getModel();
             model.setRowCount(0);
